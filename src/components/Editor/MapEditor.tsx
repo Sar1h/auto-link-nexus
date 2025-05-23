@@ -2,11 +2,13 @@
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
 import { Header } from '@/components/Layout/Header';
 import { CoordinatesDisplay } from './CoordinatesDisplay';
 import { LayersPanel } from './LayersPanel';
 import { StatusBar } from './StatusBar';
 import { EditorToolbar } from './EditorToolbar';
+import { DrawingTools } from './DrawingTools';
 import { tools, categorizeTools } from './tools';
 
 export const MapEditor: React.FC = () => {
@@ -52,9 +54,9 @@ export const MapEditor: React.FC = () => {
           zoom={zoomLevel} 
           style={{ height: '100%', width: '100%' }}
           zoomControl={false}
-          whenReady={(map) => {
+          whenReady={(mapEvent) => {
             console.log('Map initialized with OpenStreetMap');
-            map.target.on('zoom', () => handleZoomChange(map.target));
+            mapEvent.target.on('zoom', () => handleZoomChange(mapEvent.target));
           }}
         >
           <TileLayer
@@ -63,6 +65,7 @@ export const MapEditor: React.FC = () => {
           />
           <ZoomControl position="bottomright" />
           <CoordinatesDisplay />
+          <DrawingTools activeTool={activeTool} />
         </MapContainer>
       </div>
 
