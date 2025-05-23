@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
+// Import leaflet CSS from node_modules
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { Header } from '@/components/Layout/Header';

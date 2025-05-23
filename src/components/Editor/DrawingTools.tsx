@@ -5,6 +5,13 @@ import L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 
+// Extend the Leaflet types to include drawHandler
+declare module 'leaflet' {
+  interface Map {
+    drawHandler?: any;
+  }
+}
+
 interface DrawingToolsProps {
   activeTool: string;
 }
