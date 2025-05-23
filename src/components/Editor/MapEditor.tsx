@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -18,6 +18,9 @@ import {
   Layers,
   Ruler
 } from 'lucide-react';
+import { MapContainer, TileLayer, useMap, ZoomControl } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Header } from '@/components/Layout/Header';
 
 interface Tool {
   id: string;
@@ -37,17 +40,27 @@ const tools: Tool[] = [
   { id: 'delete', name: 'Delete', icon: Trash2, category: 'editing' },
 ];
 
+// Component to display coordinates
+const CoordinatesDisplay = () => {
+  const [coords, setCoords] = useState<[number, number]>([0, 0]);
+  const map = useMap();
+  
+  map.addEventListener('mousemove', (e) => {
+    setCoords([e.latlng.lat, e.latlng.lng]);
+  });
+  
+  return (
+    <div className="coordinates-display">
+      Coordinates: {coords[0].toFixed(6)}, {coords[1].toFixed(6)}
+    </div>
+  );
+};
+
 export const MapEditor: React.FC = () => {
-  const mapRef = useRef<HTMLDivElement>(null);
   const [activeTool, setActiveTool] = useState('select');
   const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
-
-  useEffect(() => {
-    // Initialize full-screen map editor (mock implementation)
-    if (mapRef.current) {
-      console.log('Initializing map editor...');
-    }
-  }, []);
+  const [zoomLevel, setZoomLevel] = useState(13);
+  const defaultPosition: [number, number] = [50.111, 8.683]; // Frankfurt coordinates from the example
 
   const toolCategories = {
     selection: tools.filter(t => t.category === 'selection'),
@@ -71,16 +84,19 @@ export const MapEditor: React.FC = () => {
     );
   };
 
+  const handleZoomChange = (map: any) => {
+    setZoomLevel(map.getZoom());
+  };
+
   return (
     <div className="h-screen w-full relative bg-gray-100">
+      <Header userType="editor" />
+      
       {/* Top Toolbar */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-white shadow-sm border-b p-2">
+      <div className="absolute top-16 left-0 right-0 z-10 bg-white shadow-sm border-b p-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">AL</span>
-              </div>
               <span className="font-semibold">AutoLink Editor</span>
             </div>
 
@@ -141,29 +157,30 @@ export const MapEditor: React.FC = () => {
         </div>
       </div>
 
-      {/* Map Canvas */}
-      <div 
-        ref={mapRef}
-        className="absolute inset-0 pt-16"
-        style={{ background: 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px' }}
-      >
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-24 h-24 bg-gradient-to-r from-orange-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Pencil className="w-12 h-12 text-white" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Map Editor Canvas</h3>
-            <p className="text-gray-500 max-w-md">
-              Full-screen map editing environment with Leaflet.js and HERE Maps integration.
-              Use the toolbar above to select editing tools.
-            </p>
-          </div>
-        </div>
+      {/* Map Canvas with OpenStreetMap */}
+      <div className="absolute inset-0 pt-32">
+        <MapContainer 
+          center={defaultPosition} 
+          zoom={zoomLevel} 
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+          whenReady={(map) => {
+            console.log('Map initialized with OpenStreetMap');
+            map.target.on('zoom', () => handleZoomChange(map.target));
+          }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <ZoomControl position="bottomright" />
+          <CoordinatesDisplay />
+        </MapContainer>
       </div>
 
       {/* Layers Panel */}
       {isLayersPanelOpen && (
-        <div className="absolute right-4 top-20 z-20">
+        <div className="absolute right-4 top-36 z-20">
           <Card className="w-64">
             <CardHeader>
               <CardTitle className="text-sm">Layers</CardTitle>
@@ -194,7 +211,7 @@ export const MapEditor: React.FC = () => {
       <div className="absolute bottom-0 left-0 right-0 bg-white border-t p-2 text-sm text-gray-600">
         <div className="flex justify-between items-center">
           <span>Tool: {tools.find(t => t.id === activeTool)?.name}</span>
-          <span>Zoom: 100% | Coordinates: 8.683, 50.111</span>
+          <span>Zoom: {zoomLevel}x | OSM-based map</span>
         </div>
       </div>
     </div>
