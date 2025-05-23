@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, BarChart3, Eye, Edit3 } from 'lucide-react';
@@ -41,13 +41,13 @@ const userTypes = [
 ];
 
 export const LoginCard: React.FC = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleLogin = (userType: string, route: string) => {
     // Store user type in localStorage
     localStorage.setItem('userType', userType);
     localStorage.setItem('userName', 'John Doe'); // Mock user
-    router.push(route);
+    navigate(route);
   };
 
   return (

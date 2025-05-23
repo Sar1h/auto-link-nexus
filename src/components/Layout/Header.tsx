@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 import { LogOut, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -10,13 +10,13 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ userType, userName = 'John Doe' }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     // Clear user data and redirect to login
     localStorage.removeItem('userType');
     localStorage.removeItem('userName');
-    router.push('/');
+    navigate('/');
   };
 
   return (
